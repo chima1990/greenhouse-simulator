@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Greenhouse Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      padding: 20px;
+    }
+    .frame {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .frame h2 {
+      margin-top: 0;
+    }
+    .status {
+      display: flex;
+      justify-content: space-between;
+    }
+    .status span {
+      font-weight: bold;
+    }
+    .input-group {
+      margin-top: 10px;
+    }
+    .input-group label {
+      margin-right: 10px;
+    }
+    .input-group input {
+      width: 60px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Virtual Greenhouse Dashboard</h1>
+  <div class="container">
+    <!-- Readings Frame -->
+    <div class="frame">
+      <h2>Current Readings</h2>
+      <div class="status" id="temperatureStatus">
+        <span>Temperature:</span>
+        <span>25°C</span>
+      </div>
+      <div class="status" id="humidityStatus">
+        <span>Humidity:</span>
+        <span>60%</span>
+      </div>
+      <div class="status" id="lightLevelStatus">
+        <span>Light Level:</span>
+        <span>100 lux</span>
+      </div>
+      <div class="status" id="soilMoistureStatus">
+        <span>Soil Moisture:</span>
+        <span>50%</span>
+      </div>
+    </div>
+
+    <!-- Controls Frame -->
+    <div class="frame">
+      <h2>Controls Status</h2>
+      <div class="status" id="fanStatus">
+        <span>Fan:</span>
+        <span>OFF</span>
+      </div>
+      <div class="status" id="sprinklerStatus">
+        <span>Sprinkler:</span>
+        <span>OFF</span>
+      </div>
+      <div class="status" id="lightsStatus">
+        <span>Lights:</span>
+        <span>OFF</span>
+      </div>
+      <div class="status" id="heaterStatus">
+        <span>Heater:</span>
+        <span>OFF</span>
+      </div>
+    </div>
+
+    <!-- Ideal Settings Frame -->
+    <div class="frame">
+      <h2>Ideal Settings</h2>
+      <div class="input-group">
+        <label for="idealTemp">Ideal Temperature (°C):</label>
+        <input type="number" id="idealTemp" value="25">
+      </div>
+      <div class="input-group">
+        <label for="idealHumidity">Ideal Humidity (%):</label>
+        <input type="number" id="idealHumidity" value="60">
+      </div>
+      <div class="input-group">
+        <label for="idealLight">Ideal Light Level (lux):</label>
+        <input type="number" id="idealLight" value="75">
+      </div>
+      <div class="input-group">
+        <label for="idealMoisture">Ideal Soil Moisture (%):</label>
+        <input type="number" id="idealMoisture" value="50">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    class GreenhouseSimulator {
+      constructor() {
+        this.temperature = 25.0;
+        this.humidity = 60.0;
+        this.lightLevel = 100.0;
+        this.soilMoisture = 50.0;
+
+        this.fanOn = false;
+        this.sprinklerOn = false;
+        this.lightsOn = false;
+        this.heaterOn = false;
+
+        this.idealTemp = 25.0;
+        this.idealHumidity = 60.0;
+        this.idealLight = 75.0;
+        this.idealMoisture = 50.0;
+
+        this.tempTolerance = 2.0;
+        this.humidityTolerance = 5.0;
+        this.lightTolerance = 10.0;
+        this.moistureTolerance = 5.0;
+
+        // Initialize the environment
+        this.updateEnvironment();
+
+        // Setup event listeners for ideal settings inputs
+        document.getElementById('idealTemp').addEventListener('input', (e) => {
+          this.idealTemp = parseFloat(e.target.value);
+          this.updateEnvironment();
+        });
+        document.getElementById('idealHumidity').addEventListener('input', (e) => {
+          this.idealHumidity = parseFloat(e.target.value);
+          this.updateEnvironment();
+        });
+        document.getElementById('idealLight').addEventListener('input', (e) => {
+          this.idealLight = parseFloat(e.target.value);
+          this.updateEnvironment();
+        });
+        document.getElementById('idealMoisture').addEventListener('input', (e) => {
+          this.idealMoisture = parseFloat(e.target.value);
+          this.updateEnvironment();
+        });
+      }
+
+      updateEnvironment() {
+        // Simulate environment changes
+        this.simulateEnvironment();
+        this.updateControls();
+        this.updateDisplay();
+      }
+
+      simulateEnvironment() {
+        // Simulate natural changes
+        this.temperature += Math.random() * 1 - 0.5;
+        this.humidity += Math.random() * 2 - 1;
+        this.lightLevel = Math.max(0, Math.min(100, this.lightLevel + Math.random() * 10 - 5));
+        this.soilMoisture += Math.random() * 1 - 0.5;
+
+        // Apply effects of controls
+        if (this.fanOn) {
+          this.temperature -= 0.5;
+          this.humidity -= 1;
+        }
+        if (this.heaterOn) {
+          this.temperature += 0.5;
+        }
+        if (this.sprinklerOn) {
+          this.humidity += 1;
+          this.soilMoisture += 0.5;
+        }
+        if (this.lightsOn) {
+          this.lightLevel = Math.min(100, this.lightLevel + 10);
+        }
+      }
+
+      updateControls() {
+        // Update control status based on current conditions
+        this.fanOn = (this.temperature > this.idealTemp + this.tempTolerance) || (this.humidity > this.idealHumidity + this.humidityTolerance);
+        this.heaterOn = this.temperature < this.idealTemp - this.tempTolerance;
+        this.sprinklerOn = this.soilMoisture < this.idealMoisture - this.moistureTolerance;
+        this.lightsOn = this.lightLevel < this.idealLight - this.lightTolerance;
+      }
+
+      updateDisplay() {
+        // Update readings in the display
+        this.updateReading('temperature', this.temperature, '°C');
+        this.updateReading('humidity', this.humidity, '%');
+        this.updateReading('lightLevel', this.lightLevel, 'lux');
+        this.updateReading('soilMoisture', this.soilMoisture, '%');
+
+        // Update control status
+        this.updateControlStatus('fan', this.fanOn);
+        this.updateControlStatus('sprinkler', this.sprinklerOn);
+        this.updateControlStatus('lights', this.lightsOn);
+        this.updateControlStatus('heater', this.heaterOn);
+      }
+
+      updateReading(name, value, unit) {
+        const element = document.getElementById(`${name}Status`);
+        element.querySelector('span:last-child').textContent = `${value.toFixed(1)} ${unit}`;
+      }
+
+      updateControlStatus(name, isOn) {
+        const element = document.getElementById(`${name}Status`);
+        element.querySelector('span:last-child').textContent = isOn ? 'ON' : 'OFF';
+      }
+    }
+
+    // Instantiate the simulator
+    new GreenhouseSimulator();
+  </script>
+
+</body>
+</html>
